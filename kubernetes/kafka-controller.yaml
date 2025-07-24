@@ -1,0 +1,99 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-controller
+  labels:
+    app: kafka-controller
+spec:
+  ports:
+    - port: 9091
+      targetPort: 9091
+      protocol: TCP
+  clusterIP: None
+  selector:
+    app: kafka-controller
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: kafka-controller
+spec:
+  selector:
+    matchLabels:
+      app: kafka-controller
+  serviceName: "kafka-controller"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: kafka-controller
+    spec:
+      terminationGracePeriodSeconds: 10
+
+      volumes:
+        - name: controller-config
+          hostPath:
+            path: /kafka/controller.properties
+            type: File
+
+      initContainers:
+      - name: kafka-init
+        image: confluentinc/cp-kafka:7.4.0
+        command:
+          - sh
+          - -c
+          - |
+            HOSTNAME=$(hostname)
+            NODE_ID=$(echo $HOSTNAME | sed 's/kafka-controller-//')
+            export KAFKA_NODE_ID=$NODE_ID
+            kafka-storage format --ignore-formatted --cluster-id hljM2T6EQdSKyVaXRttpCg --config /kafka/controller.properties
+        volumeMounts:
+          - name: kafka-data
+            mountPath: /var/lib/kafka/data
+          - name: controller-config
+            mountPath: /kafka/controller.properties
+            subPath: controller.properties
+
+      containers:
+      - name: kafka-controller
+        image: confluentinc/cp-kafka:7.4.0
+        ports:
+          - containerPort: 9091
+            name: broker
+        command:
+          - sh
+          - -c
+          - |
+            HOSTNAME=$(hostname)
+            NODE_ID=$(echo $HOSTNAME | sed 's/kafka-controller-//')
+            export KAFKA_NODE_ID=$NODE_ID
+            export KAFKA_LISTENERS="CONTROLLER://$HOSTNAME:9091"
+            export KAFKA_CONTROLLER_QUORUM_VOTERS="1@$HOSTNAME:9091"
+            /etc/confluent/docker/run
+        env:
+          - name: KAFKA_PROCESS_ROLES
+            value: controller
+          - name: KAFKA_CONTROLLER_LISTENER_NAMES
+            value: CONTROLLER
+          - name: KAFKA_LOG_DIRS
+            value: /var/lib/kafka/data
+          - name: KAFKA_CLUSTER_ID
+            value: hljM2T6EQdSKyVaXRttpCg
+          - name: CLUSTER_ID
+            value: hljM2T6EQdSKyVaXRttpCg
+        volumeMounts:
+          - name: kafka-data
+            mountPath: /var/lib/kafka/data
+          - name: controller-config
+            mountPath: /kafka/controller.properties
+            subPath: controller.properties
+
+  volumeClaimTemplates:
+  - metadata:
+      name: kafka-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "hostpath"
+      resources:
+        requests:
+          storage: 1Gi
