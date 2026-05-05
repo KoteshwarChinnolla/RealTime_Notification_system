@@ -22,7 +22,7 @@ spec:
     matchLabels:
       app: kafka-controller
   serviceName: "kafka-controller"
-  replicas: 3
+  replicas: {{ .Values.controllerReplicas }}
   template:
     metadata:
       labels:

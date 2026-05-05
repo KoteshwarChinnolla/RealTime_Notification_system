@@ -1,0 +1,72 @@
+replicaCount: 3
+
+microservice:
+  name: employee
+  namespace: hrms
+  port: 8081
+
+
+image:
+  repository: koti21/employee-service-hrms
+  pullPolicy: IfNotPresent
+  tag: "v1"
+
+
+resources: 
+  limits:
+    cpu: 1000m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  # Optional:
+  # targetMemoryUtilizationPercentage: 75
+
+livenessProbe:
+  path: "employee/actuator/health/liveness"
+  initialDelaySeconds: 180
+  periodSeconds: 10
+
+readinessProbe:
+  path: "employee/actuator/health/readiness"
+  initialDelaySeconds: 150
+  periodSeconds: 10
+
+
+service:
+  type: NodePort
+  port: 80
+  nodePort: 30081
+  # Optional - only used if service.type is LoadBalancer
+  # loadBalancerIP: 1.2.3.4
+
+
+ingress:
+  enabled: true
+  className: kong
+  annotations:
+    konghq.com/strip-path: "false"
+    konghq.com/plugins: jwt-plugin
+    kubernetes.io/ingress.class: kong
+    konghq.com/methods: "GET, POST"
+  hosts:
+    - host: ""  # Optional: Set to a domain like api.example.com if needed
+      paths:
+        - path: /employee
+          pathType: Prefix
+
+
+serviceAccount:
+  annotations:
+    example.com/annotation: "value"
+  rules:
+    - apiGroups: [""]
+      resources: ["pods"] 
+      verbs: ["get", "list", "watch"]

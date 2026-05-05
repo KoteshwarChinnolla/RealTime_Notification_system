@@ -1,0 +1,50 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: {{ .Values.microservice.name }}-virtual-service
+  labels:
+    app: {{ .Values.microservice.name }}
+    version: v1
+spec:
+    hosts:
+        - {{- range .Values.ingress.hosts }}
+        {{- if .host }}
+        {{ .host }}
+        {{- end }}
+        {{- end }}
+    gateways:
+        - {{ .Values.microservice.name }}-gateway
+    http:
+    - match:
+        - uri:
+            prefix: /{{ .Values.microservice.name }}
+      route:
+        - destination:
+            host: {{ .Values.microservice.name }}.{{ .Values.microservice.namespace }}.svc.cluster.local
+            port:
+              number: {{ .Values.service.port }}
+
+
+
+
+# apiVersion: networking.istio.io/v1
+# kind: VirtualService
+# metadata:
+#   name: employee-virtual-service
+#   labels:
+#     app: employee
+#     version: v1
+# spec:
+#   hosts:
+#     - "example.com"
+#   gateways:
+#     - employee-gateway
+#   http:
+#   - match:
+#     - uri:
+#         prefix: /chat
+#     route:
+#     - destination:
+#         host: chat.hrms.svc.cluster.local
+#         port:
+#           number: 80

@@ -1,0 +1,2 @@
+controllerReplicas: 1
+brokerReplicas: 3

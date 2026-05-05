@@ -1,0 +1,29 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: employee-virtual-service
+  labels:
+    app: employee
+    version: v1
+spec:
+  hosts:
+    - "example.com"
+  gateways:
+    - employee-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /chat
+    route:
+    - destination:
+        host: chat.hrms.svc.cluster.local
+        port:
+          number: 80
+  - match:
+      - uri:
+          prefix: /employee
+    route:
+      - destination:
+          host: employee-service.hrms.svc.cluster.local
+          port:
+            number: 80

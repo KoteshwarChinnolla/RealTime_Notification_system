@@ -1,0 +1,38 @@
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: {{ .Values.microservice.name }}-gateway
+  labels:
+    app: {{ .Values.microservice.name }}
+spec:
+  selector:
+    istio: {{ .Values.microservice.name }}-gateway
+  servers:
+    - port:
+        number: {{ .Values.service.port }}
+        name: http
+        protocol: HTTP
+      hosts:
+        - {{- range .Values.ingress.hosts }}
+          {{- if .host }}
+          {{ .host }}
+          {{- end }}
+          {{- end }}
+
+
+
+
+# apiVersion: networking.istio.io/v1
+# kind: Gateway
+# metadata:
+#   name: 
+# spec:
+#   selector:
+#     istio: employee-gateway
+#   servers:
+#     - port:
+#         number: 80
+#         name: http
+#         protocol: HTTP
+#       hosts:
+#         - "example.com"

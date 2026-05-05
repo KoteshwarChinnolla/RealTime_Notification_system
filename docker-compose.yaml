@@ -272,6 +272,27 @@ services:
     #   - kafka-broker-3
     networks:
       - app-network
+  # chatService:
+  #   container_name: chat-kafka
+  #   image: chat-kafka:latest
+  #   build:
+  #     context: ./chat-service-using-kafka
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "8082:8082"
+  #   depends_on:
+  #     # - redis-master
+  #     # - redis-slave1
+  #     # - redis-slave2
+  #     # - sentinel-0
+  #     # - sentinel-1
+  #     # - sentinel-2
+  #     - kafka-controller-1
+  #     - kafka-broker-1
+  #     - kafka-broker-2
+  #     - kafka-broker-3
+  #   networks:
+  #     - app-network
 
 networks:
   app-network:

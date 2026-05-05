@@ -1,0 +1,11 @@
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: {{ .Values.microservice.name }}-destination-rule
+  labels:
+    app: {{ .Values.microservice.name }}
+spec:
+  host: {{ .Values.microservice.name }}.{{ .Values.microservice.namespace }}.svc.cluster.local
+  trafficPolicy:
+    loadBalancer:
+      simple: LEAST_REQUEST

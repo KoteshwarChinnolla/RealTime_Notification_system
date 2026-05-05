@@ -22,7 +22,7 @@ spec:
     matchLabels:
       app: kafka-broker
   serviceName: "kafka-broker"
-  replicas: 3
+  replicas: {{ .Values.brokerReplicas }}
   template:
     metadata:
       labels:

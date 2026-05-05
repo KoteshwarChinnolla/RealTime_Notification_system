@@ -1,0 +1,14 @@
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: employee-gateway 
+spec:
+  selector:
+    istio: employee-gateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - "example.com"

@@ -1,0 +1,70 @@
+replicaCount: 3
+
+microservice:
+  name: employee
+  namespace: ems
+  port: 8080
+
+
+image:
+  repository: koti21/employee
+  pullPolicy: IfNotPresent
+  tag: "v1"
+
+
+resources: 
+  limits:
+    cpu: 800m
+    memory: 512Mi
+  requests:
+    cpu: 500m
+    memory: 128Mi
+
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  # Optional:
+  # targetMemoryUtilizationPercentage: 75
+
+livenessProbe:
+  initialDelaySeconds: 120
+  periodSeconds: 10
+
+readinessProbe:
+  initialDelaySeconds: 120
+  periodSeconds: 10
+
+
+service:
+  type: NodePort
+  port: 80
+  nodePort: 30080
+  # Optional - only used if service.type is LoadBalancer
+  # loadBalancerIP: 1.2.3.4
+
+
+ingress:
+  enabled: true
+  className: kong
+  annotations:
+    konghq.com/strip-path: "false"
+    konghq.com/plugins: jwt-plugin
+    kubernetes.io/ingress.class: kong
+    konghq.com/methods: "GET, POST"
+  hosts:
+    - host: ""  # Optional: Set to a domain like api.example.com if needed
+      paths:
+        - path: /employee
+          pathType: Prefix
+
+
+serviceAccount:
+  annotations:
+    example.com/annotation: "value"
+  rules:
+    - apiGroups: [""]
+      resources: ["pods"] 
+      verbs: ["get", "list", "watch"]
